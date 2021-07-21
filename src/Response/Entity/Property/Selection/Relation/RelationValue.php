@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Property\Selection\Relation;
 
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Translatable;
 
-class RelationValue extends Entity
+class RelationValue extends Entity implements Translatable
 {
     /** @var int */
     private $id;

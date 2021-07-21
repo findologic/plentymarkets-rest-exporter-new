@@ -31,10 +31,13 @@ class PropertySelection extends Entity
     {
         $this->id = $this->getIntProperty('id', $data);
         $this->propertyId = $this->getIntProperty('propertyId', $data);
-        $this->relation = $this->getEntity(PropertyRelation::class, $data['relation']);
         $this->position = $this->getIntProperty('position', $data);
         $this->createdAt = $this->getDateTimeProperty('createdAt', $data);
         $this->updatedAt = $this->getDateTimeProperty('updatedAt', $data);
+
+        if (isset($data['relation'])) {
+            $this->relation = $this->getEntity(PropertyRelation::class, $data['relation']);
+        }
     }
 
     public function getData(): array

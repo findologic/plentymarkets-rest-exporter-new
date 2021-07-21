@@ -15,7 +15,9 @@ use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Image;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Property;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\SalesPrice;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Tag;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\TagName;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Unit;
+use FINDOLOGIC\PlentyMarketsRestExporter\Translator;
 
 class Variation extends Entity
 {
@@ -199,11 +201,10 @@ class Variation extends Entity
     public function hasExportExclusionTag(string $lang): bool
     {
         foreach ($this->getTags() as $tag) {
-            foreach ($tag->getTagData()->getNames() as $name) {
-                if (strtolower($name->getLang()) !== strtolower($lang)) {
-                    continue;
-                }
+            /** @var TagName[] $names */
+            $names = Translator::translateMultiple($tag->getTagData()->getNames(), $lang);
 
+            foreach ($names as $name) {
                 if (strtolower($name->getName()) === self::EXCLUSION_TAG_NAME) {
                     return true;
                 }

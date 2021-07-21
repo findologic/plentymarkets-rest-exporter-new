@@ -9,8 +9,13 @@ use FINDOLOGIC\PlentyMarketsRestExporter\Config;
 use FINDOLOGIC\PlentyMarketsRestExporter\Definition\CastType;
 use FINDOLOGIC\PlentyMarketsRestExporter\RegistryService;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\ItemProperty;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\ItemProperty\Name as ItemPropertyName;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Characteristic;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\CharacteristicSelection;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\CharacteristicText;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Variation as VariationEntity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\PropertyGroup\Name;
+use FINDOLOGIC\PlentyMarketsRestExporter\Translator;
 use FINDOLOGIC\PlentyMarketsRestExporter\Utils;
 
 /**
@@ -99,18 +104,21 @@ trait CharacteristicAware
             case CastType::EMPTY:
                 return $variationProperty->getBackendName();
             case CastType::TEXT:
-                foreach ($characteristic->getValueTexts() as $text) {
-                    if (strtoupper($text->getLang()) === strtoupper($this->config->getLanguage())) {
-                        return $text->getValue();
-                    }
+                /** @var CharacteristicText|null $text */
+                $text = Translator::translate($characteristic->getValueTexts(), $this->config->getLanguage());
+                if ($text) {
+                    return $text->getValue();
                 }
 
                 return null;
             case CastType::SELECTION:
-                foreach ($characteristic->getPropertySelections() as $selection) {
-                    if (strtoupper($selection->getLang()) === strtoupper($this->config->getLanguage())) {
-                        return $selection->getName();
-                    }
+                /** @var CharacteristicSelection|null $selection */
+                $selection = Translator::translate(
+                    $characteristic->getPropertySelections(),
+                    $this->config->getLanguage()
+                );
+                if ($selection) {
+                    return $selection->getName();
                 }
 
                 return null;
@@ -127,11 +135,9 @@ trait CharacteristicAware
         ItemProperty $itemProperty,
         ?string $default
     ): ?string {
-        foreach ($itemProperty->getNames() as $name) {
-            if ($name->getLang() !== $this->config->getLanguage()) {
-                continue;
-            }
-
+        /** @var ItemPropertyName $name */
+        $name = Translator::translate($itemProperty->getNames(), $this->config->getLanguage());
+        if ($name) {
             return $name->getName();
         }
 
@@ -144,10 +150,10 @@ trait CharacteristicAware
             return null;
         }
 
-        foreach ($propertyGroup->getNames() as $name) {
-            if (strtoupper($name->getLang()) === strtoupper($this->config->getLanguage())) {
-                return $name->getName();
-            }
+        /** @var Name|null $name */
+        $name = Translator::translate($propertyGroup->getNames(), $this->config->getLanguage());
+        if ($name) {
+            return $name->getName();
         }
 
         return $propertyGroup->getBackendName();

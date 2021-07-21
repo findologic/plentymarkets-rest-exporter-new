@@ -68,8 +68,14 @@ class Property extends Entity
         $this->updatedAt = (string)$data['updatedAt'];
         $this->propertyId = (string)$data['propertyId'];
         $this->propertyGroupId = (string)$data['propertyGroupId'];
-        $this->availabilities = $data['availabilities']; // Unknown structure - undocumented, got only empty arrays.
-        $this->markets = $data['markets']; // Unknown structure - undocumented, got only empty arrays.
+
+        if (isset($data['availabilities'])) {
+            $this->availabilities = $data['availabilities']; // Unknown structure - undocumented, got only empty arrays.
+        }
+
+        if (isset($data['markets'])) {
+            $this->markets = $data['markets']; // Unknown structure - undocumented, got only empty arrays.
+        }
 
         if (!empty($data['groups'])) {
             foreach ($data['groups'] as $group) {

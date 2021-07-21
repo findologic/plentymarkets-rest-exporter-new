@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\PropertyGroup;
 
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Translatable;
 
-class Name extends Entity
+class Name extends Entity implements Translatable
 {
     /** @var int */
     private $propertyGroupId;
@@ -43,9 +44,9 @@ class Name extends Entity
         return $this->propertyGroupId;
     }
 
-    public function getLang(): ?string
+    public function getLang(): string
     {
-        return $this->lang;
+        return (string)$this->lang;
     }
 
     public function getName(): ?string

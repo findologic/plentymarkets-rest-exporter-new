@@ -11,12 +11,18 @@ use FINDOLOGIC\Export\Data\Property;
 use FINDOLOGIC\Export\Data\Usergroup;
 use FINDOLOGIC\PlentyMarketsRestExporter\Config;
 use FINDOLOGIC\PlentyMarketsRestExporter\RegistryService;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Attribute\Name;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Category;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Category\CategoryDetails;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\ItemVariation\ItemImage;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\ItemVariation\ItemImage\Availability;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\AttributeValueName;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Image as PimImage;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Tag;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\TagName;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Variation as PimVariation;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Unit\Name as UnitName;
+use FINDOLOGIC\PlentyMarketsRestExporter\Translator;
 use FINDOLOGIC\PlentyMarketsRestExporter\Utils;
 
 class Variation
@@ -254,11 +260,9 @@ class Variation
                 continue;
             }
 
-            foreach ($category->getDetails() as $categoryDetail) {
-                if (strtoupper($categoryDetail->getLang()) !== strtoupper($this->config->getLanguage())) {
-                    continue;
-                }
-
+            /** @var CategoryDetails[] $categoryDetails */
+            $categoryDetails = Translator::translateMultiple($category->getDetails(), $this->config->getLanguage());
+            foreach ($categoryDetails as $categoryDetail) {
                 $this->attributes[] = new Attribute('cat', [$this->buildCategoryPath($category)]);
                 $this->attributes[] = new Attribute(
                     'cat_url',
@@ -272,11 +276,9 @@ class Variation
     private function buildCategoryPath(Category $category): string
     {
         $path = [];
-        foreach ($category->getDetails() as $categoryDetail) {
-            if (strtoupper($categoryDetail->getLang()) !== strtoupper($this->config->getLanguage())) {
-                continue;
-            }
-
+        /** @var CategoryDetails[] $categoryDetails */
+        $categoryDetails = Translator::translateMultiple($category->getDetails(), $this->config->getLanguage());
+        foreach ($categoryDetails as $categoryDetail) {
             if ($category->getParentCategoryId() !== null) {
                 $path[] = $this->buildCategoryPath(
                     $this->registryService->getCategory($category->getParentCategoryId())
@@ -328,19 +330,20 @@ class Variation
             }
 
             $attributeName = $attribute->getBackendName();
-            foreach ($attribute->getNames() as $attributeTranslation) {
-                if (strtolower($attributeTranslation->getLang()) === strtolower($this->config->getLanguage())) {
-                    $attributeName = $attributeTranslation->getName();
-                    break;
-                }
+            /** @var Name|null $attributeTranslation */
+            $attributeTranslation = Translator::translate($attribute->getNames(), $this->config->getLanguage());
+            if ($attributeTranslation) {
+                $attributeName = $attributeTranslation->getName();
             }
 
             $value = $variationAttributeValue->getValue()->getBackendName();
-            foreach ($variationAttributeValue->getValue()->getNames() as $valueTranslation) {
-                if (strtolower($valueTranslation->getLang()) === strtolower($this->config->getLanguage())) {
-                    $value = $valueTranslation->getName();
-                    break;
-                }
+            /** @var AttributeValueName $valueTranslation */
+            $valueTranslation = Translator::translate(
+                $variationAttributeValue->getValue()->getNames(),
+                $this->config->getLanguage()
+            );
+            if ($valueTranslation) {
+                $value = $valueTranslation->getName();
             }
 
             $this->attributes[] = new Attribute(
@@ -376,12 +379,10 @@ class Variation
 
             $tagName = $tag->getTagData()->getName();
 
-            foreach ($tag->getTagData()->getNames() as $translatedTag) {
-                if ($translatedTag->getLang() === strtolower($this->config->getLanguage())) {
-                    $tagName = $translatedTag->getName();
-
-                    break;
-                }
+            /** @var TagName|null $translatedTag */
+            $translatedTag = Translator::translate($tag->getTagData()->getNames(), $this->config->getLanguage());
+            if ($translatedTag) {
+                $tagName = $translatedTag->getName();
             }
 
             $this->tags[] = new Keyword($tagName);
@@ -447,10 +448,10 @@ class Variation
         $this->packageSize = $unitData->getContent();
 
         if ($unitEntity = $this->registryService->getUnit($unitData->getUnitId())) {
-            foreach ($unitEntity->getNames() as $name) {
-                if (strtolower($name->getLang()) === (strtolower($this->config->getLanguage()))) {
-                    $this->baseUnit = $name->getName();
-                }
+            /** @var UnitName|null $name */
+            $name = Translator::translate($unitEntity->getNames(), $this->config->getLanguage());
+            if ($name) {
+                $this->baseUnit = $name->getName();
             }
         }
     }

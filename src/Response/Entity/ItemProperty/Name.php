@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\ItemProperty;
 
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Translatable;
 
-class Name extends Entity
+class Name extends Entity implements Translatable
 {
     /** @var int */
     private $propertyId;

@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property;
 
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Translatable;
 
-class PropertyValue extends Entity
+class PropertyValue extends Entity implements Translatable
 {
     /** @var int|null This id is nullable */
     private $id;

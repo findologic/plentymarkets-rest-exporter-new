@@ -78,7 +78,7 @@ class CsvWrapper extends Wrapper
                     )
                 );
 
-                return;
+                continue;
             }
 
             $productVariations = $variations->find([

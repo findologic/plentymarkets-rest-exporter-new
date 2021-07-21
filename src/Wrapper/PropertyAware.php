@@ -10,7 +10,11 @@ use FINDOLOGIC\PlentyMarketsRestExporter\Definition\CastType;
 use FINDOLOGIC\PlentyMarketsRestExporter\RegistryService;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\ItemVariation\Property as ItemVariationProperty;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\Property as PimProperty;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\PropertyRelationValue;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\PropertyValue;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Variation as VariationEntity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Property\Name;
+use FINDOLOGIC\PlentyMarketsRestExporter\Translator;
 use FINDOLOGIC\PlentyMarketsRestExporter\Utils;
 
 /**
@@ -34,10 +38,10 @@ trait PropertyAware
             }
 
             $propertyName = null;
-            foreach ($propertyDetails->getNames() as $name) {
-                if (strtoupper($name->getLang()) === strtoupper($this->config->getLanguage())) {
-                    $propertyName = $name->getName();
-                }
+            /** @var Name|null $name */
+            $name = Translator::translate($propertyDetails->getNames(), $this->config->getLanguage());
+            if ($name) {
+                $propertyName = $name->getName();
             }
 
             $value = $this->getPropertyValue($property);
@@ -47,7 +51,7 @@ trait PropertyAware
             }
 
             // Convert $value to an array in case it only contains a single value.
-            $this->attributes[] = new Attribute($propertyName, (array)$value);
+            $this->attributes[] = new Attribute((string)$propertyName, (array)$value);
         }
     }
 
@@ -62,11 +66,9 @@ trait PropertyAware
                 return null;
             case CastType::SHORT_TEXT:
             case CastType::LONG_TEXT:
-                foreach ($property->getValues() as $propertyValue) {
-                    if (strtoupper($propertyValue->getLang()) !== strtoupper($this->config->getLanguage())) {
-                        continue;
-                    }
-
+                /** @var PropertyValue|null $propertyValue */
+                $propertyValue = Translator::translate($property->getValues(), $this->config->getLanguage());
+                if ($propertyValue) {
                     return $propertyValue->getValue();
                 }
 
@@ -81,11 +83,12 @@ trait PropertyAware
                         continue;
                     }
 
-                    foreach ($selection->getRelation()->getValues() as $relationValue) {
-                        if (strtoupper($relationValue->getLang()) !== strtoupper($this->config->getLanguage())) {
-                            continue;
-                        }
-
+                    /** @var PropertyRelationValue|null $relationValue */
+                    $relationValue = Translator::translate(
+                        $selection->getRelation()->getValues(),
+                        $this->config->getLanguage()
+                    );
+                    if ($relationValue) {
                         return $relationValue->getValue();
                     }
                 }

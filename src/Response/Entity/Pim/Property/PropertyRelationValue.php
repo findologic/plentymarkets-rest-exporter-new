@@ -6,8 +6,9 @@ namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property;
 
 use DateTimeInterface;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Translatable;
 
-class PropertyRelationValue extends Entity
+class PropertyRelationValue extends Entity implements Translatable
 {
     /** @var int */
     private $id;

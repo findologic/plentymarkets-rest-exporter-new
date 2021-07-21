@@ -25,12 +25,12 @@ class PropertySelectionParser extends Parser
 
         return new PropertySelectionResponse(
             $response['page'],
-            $response['totalsCount'],
+            (int)$response['totalsCount'],
             $response['isLastPage'],
             $selections,
-            $response['lastPageNumber'],
-            $response['firstOnPage'],
-            $response['lastOnPage'],
+            (int)$response['lastPageNumber'],
+            (int)$response['firstOnPage'],
+            (int)$response['lastOnPage'],
             (int)$response['itemsPerPage']
         );
     }

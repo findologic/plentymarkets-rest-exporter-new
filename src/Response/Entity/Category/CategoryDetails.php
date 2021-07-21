@@ -7,8 +7,9 @@ namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Category;
 use DateTime;
 use DateTimeInterface;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Translatable;
 
-class CategoryDetails extends Entity
+class CategoryDetails extends Entity implements Translatable
 {
     /** @var int */
     private $categoryId;

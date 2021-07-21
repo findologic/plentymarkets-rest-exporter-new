@@ -16,8 +16,10 @@ use FINDOLOGIC\Export\Exporter;
 use FINDOLOGIC\PlentyMarketsRestExporter\Config;
 use FINDOLOGIC\PlentyMarketsRestExporter\RegistryService;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Item as ProductEntity;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Item\Text;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Variation as PimVariation;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\WebStore\Configuration as StoreConfiguration;
+use FINDOLOGIC\PlentyMarketsRestExporter\Translator;
 use FINDOLOGIC\PlentyMarketsRestExporter\Utils;
 
 class Product
@@ -145,27 +147,25 @@ class Product
 
         $textGetter = 'getName' . $this->storeConfiguration->getDisplayItemName();
 
-        foreach ($this->productEntity->getTexts() as $texts) {
-            if (strtoupper($texts->getLang()) !== strtoupper($this->config->getLanguage())) {
-                continue;
-            }
-
-            $name = $texts->$textGetter();
+        /** @var Text[] $texts */
+        $texts = Translator::translateMultiple($this->productEntity->getTexts(), $this->config->getLanguage());
+        foreach ($texts as $text) {
+            $name = $text->$textGetter();
             if (trim($name) !== '') {
                 $this->item->addName($name);
             }
 
-            if (trim($texts->getShortDescription()) !== '') {
-                $this->item->addSummary($texts->getShortDescription());
+            if (trim($text->getShortDescription()) !== '') {
+                $this->item->addSummary($text->getShortDescription());
             }
-            if (trim($texts->getDescription()) !== '') {
-                $this->item->addDescription($texts->getDescription());
+            if (trim($text->getDescription()) !== '') {
+                $this->item->addDescription($text->getDescription());
             }
-            if (trim($texts->getKeywords()) !== '') {
-                $this->item->addKeyword(new Keyword($texts->getKeywords()));
+            if (trim($text->getKeywords()) !== '') {
+                $this->item->addKeyword(new Keyword($text->getKeywords()));
             }
 
-            $this->item->addUrl($this->buildProductUrl($texts->getUrlPath()));
+            $this->item->addUrl($this->buildProductUrl($text->getUrlPath()));
         }
     }
 

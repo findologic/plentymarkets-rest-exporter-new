@@ -7,8 +7,10 @@ namespace FINDOLOGIC\PlentyMarketsRestExporter\Response\Collection;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Entity;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Pim\Property\PropertyValue;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Property\Selection;
+use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\Property\Selection\Relation\RelationValue;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\Entity\PropertySelection;
 use FINDOLOGIC\PlentyMarketsRestExporter\Response\IterableResponse;
+use FINDOLOGIC\PlentyMarketsRestExporter\Translator;
 
 class PropertySelectionResponse extends IterableResponse implements CollectionInterface, IterableResponseInterface
 {
@@ -92,14 +94,15 @@ class PropertySelectionResponse extends IterableResponse implements CollectionIn
             );
         }
 
+        /** @var Selection[] $propertySelections */
         $propertySelections = array_filter($propertySelections);
 
         $values = [];
         foreach ($propertySelections as $propertySelection) {
-            foreach ($propertySelection->getRelation()->getRelationValues() as $relationValue) {
-                if (strtoupper($relationValue->getLang()) == strtoupper($lang)) {
-                    $values[$propertySelection->getId()] = $relationValue->getValue();
-                }
+            /** @var RelationValue|null $relationValue */
+            $relationValue = Translator::translate($propertySelection->getRelation()->getRelationValues(), $lang);
+            if ($relationValue) {
+                $values[$propertySelection->getId()] = $relationValue->getValue();
             }
         }
 
